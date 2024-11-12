@@ -1,0 +1,24 @@
+name: Multi-cluster
+run-name: "xxx"
+on:
+  workflow_dispatch:
+    inputs:
+      clusters:
+        type: choice
+        options:
+          - aaa
+          - bbb
+
+jobs:
+  test-aaa:
+    name: aaa
+    runs-on: ubuntu-22.04
+    steps:
+      - name: "just an echo"
+        run: "I'm the AAA"
+  test-bbb:
+    name: bbb
+    runs-on: ubuntu-22.04
+    steps:
+      - name: "just an echo"
+        run: "I'm the BBB"
