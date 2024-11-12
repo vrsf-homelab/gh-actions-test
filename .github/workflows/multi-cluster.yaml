@@ -1,24 +1,93 @@
-name: Multi-cluster
-run-name: "xxx"
+name: CD
+run-name: ${{ github.event.client_payload.ref_name || github.ref_name }}
 on:
   workflow_dispatch:
     inputs:
-      clusters:
+      cluster-type:
         type: choice
         options:
-          - aaa
-          - bbb
+          - slow
+          - fast
+      int-alpha:
+        description: Deploy to int-alpha.
+        type: boolean
+      int-bravo:
+        description: Deploy to int-bravo.
+        type: boolean
+      prod-alpha:
+        description: Deploy to prod-alpha.
+        type: boolean
+      prod-bravo:
+        description: Deploy to prod-bravo.
+        type: boolean
+      prod-charlie:
+        description: Deploy to prod-charlie.
+        type: boolean
+      prod-delta:
+        description: Deploy to prod-delta.
+        type: boolean
+      prod-echo:
+        description: Deploy to prod-echo.
+        type: boolean
+      prod-foxtrot:
+        description: Deploy to prod-foxtrot.
+        type: boolean
 
 jobs:
-  test-aaa:
-    name: aaa
+  int-slow:
+    if: ${{ cancelled() == false && failure() == false && inputs[matrix.variant] != false && inputs["cluster-type"] == "slow" }}
+    name: Deploy to ${{ matrix.variant }}
     runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        variant: [int-alpha, int-bravo]
     steps:
-      - name: "just an echo"
-        run: "I'm the AAA"
-  test-bbb:
-    name: bbb
+      - name: Echo
+        run: |
+          echo "variant: ${{ matrix.variant }}"
+          echo "cluster type: ${{ inputs["cluster-type"] }}"
+  prod-slow:
+    if: ${{ cancelled() == false && failure() == false && inputs[matrix.variant] != false && inputs["cluster-type"] == "slow" }}
+    name: Deploy to ${{ matrix.variant }}
     runs-on: ubuntu-22.04
+    environment: prod
+    strategy:
+      matrix:
+        variant: [prod-alpha, prod-bravo, prod-charlie, prod-delta, prod-echo, prod-foxtrot]
     steps:
-      - name: "just an echo"
-        run: "I'm the BBB"
+      - name: Echo
+        run: |
+          echo "variant: ${{ matrix.variant }}"
+          echo "cluster type: ${{ inputs["cluster-type"] }}"
+  # deploy:
+
+  #   strategy:
+  #     matrix:
+  #       include:
+  #         - env: int
+  #           helm-release-path: c2a-int/transform-worker
+  #           variant: int-alpha
+  #         - env: int
+  #           helm-release-path: c2a-int/transform-worker
+  #           variant: int-bravo
+  #         - env: prod
+  #           helm-release-path: c2a/transform-worker
+  #           variant: prod-alpha
+  #           needs: int-alpha
+  #         - env: prod
+  #           helm-release-path: c2a/transform-worker
+  #           variant: prod-bravo
+  #           needs: int-bravo
+  #         - env: prod
+  #           helm-release-path: c2a/transform-worker
+  #           variant: prod-charlie
+  #         - env: prod
+  #           helm-release-path: c2a/transform-worker
+  #           variant: prod-delta
+  #         - env: prod
+  #           helm-release-path: c2a/transform-worker
+  #           variant: prod-echo
+  #           needs: int-echo
+  #         - env: prod
+  #           helm-release-path: c2a/transform-worker
+  #           variant: prod-foxtrot
